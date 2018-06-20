@@ -5,11 +5,17 @@ Created on Sun Jun 17 13:25:12 2018
 @author: Sade
 """
 
+#%% Packages
+
 import numpy as np
 import pandas as pd
 import geopandas as gpd
 import urllib
 import os
+
+import urllib.request
+import shapely
+from pathlib import Path
 
 #%% Importing and Setting Up Fail Code Data
 
@@ -72,3 +78,58 @@ wo[f3 & mask4][['resolveddatetime','count']].resample('w', on='resolveddatetime'
 
 #%% Combining Work Order and Inventory Data . . .
 
+# Returns geopandas dataframe:
+def to_gdf(df, x, y, crs):
+    return gpd.GeoDataFrame(
+        df,
+        crs=crs,
+        geometry=[shapely.geometry.Point(xy) for xy in zip(df[x], df[y])]
+)
+
+# Checks to see if the file is in the system and if not downloads it:
+def check_download(source_url, target_file):
+    if Path(target_file).is_file():
+        print(f'{target_file} exists; skipping download')
+    else: 
+        print(f'downloading {target_file} to {target_file}')
+        urllib.request.urlretrieve(source_url, target_file)  
+
+# Uses above and then reads the file into geopandas
+def download_and_parse(source_url, target_file):
+    check_download(source_url, target_file)
+    print('reading into geopandas')
+    return gpd.read_file(target_file)
+
+# Concats a loop of several urls and target files (used here to combine the crime data):
+def download_parse_and_concat(soure_url_and_target_files):
+    return pd.concat(
+        map(lambda s_and_t: download_and_parse(s_and_t[0], s_and_t[1]), soure_url_and_target_files)
+    )
+
+# Getting the crime data:
+crimes = download_parse_and_concat([
+    ['https://opendata.arcgis.com/datasets/38ba41dd74354563bce28a359b59324e_0.geojson', 'crimes_2018.geojson'],
+    ["https://opendata.arcgis.com/datasets/6af5cb8dc38e4bcbac8168b27ee104aa_38.geojson", "crimes_2017.geojson"],
+    ["https://opendata.arcgis.com/datasets/bda20763840448b58f8383bae800a843_26.geojson", "crimes_2016.geojson"],
+]).assign(
+    REPORT_DAT=lambda df: pd.to_datetime(df.REPORT_DAT),
+    START_DATE=lambda df: pd.to_datetime(df.START_DATE),
+    END_DATE=lambda df: pd.to_datetime(df.END_DATE, errors='coerce'),
+).to_crs(
+    {'init': 'epsg:2804'}
+)
+
+# Getting repair data:
+repairs = to_gdf(
+    pd.read_excel(
+        'repairs.xlsx',
+        thousands=',',
+        converters={
+            'Day of Datewoclosed': pd.to_datetime
+        },
+        na_values='0'
+    ).dropna(),
+    x='Woxcoordinate',
+    y='Woycoordinate',
+    crs={"init": "EPSG:2804"}
+)
