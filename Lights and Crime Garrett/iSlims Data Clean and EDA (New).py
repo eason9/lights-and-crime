@@ -12,11 +12,15 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 #%% Data
+Windows = 'C:/Users/Sade/Documents/GitHub/lights-and-crime/Lights and Crime Garrett/Data'
+Linux = '/home/sade/Desktop/Git Cloned Repos/lights-and-crime/Lights and Crime Garrett/Data'
 
-wo = pd.read_excel('C:/Users/Sade/Documents/GitHub/lights-and-crime/Lights and Crime Garrett/Data/islims_workorders.xlsx')
-de = pd.read_excel('C:/Users/Sade/Documents/GitHub/lights-and-crime/Lights and Crime Garrett/Data/islims_workorders_detail.xlsx')
-iv = pd.read_excel('C:/Users/Sade/Documents/GitHub/lights-and-crime/Lights and Crime Garrett/Data/islims_inventory.xlsx')
-fc = pd.read_excel('C:/Users/Sade/Documents/GitHub/lights-and-crime/Lights and Crime Garrett/Data/islims_failure_codes.xlsx')
+choice = Linux
+
+wo = pd.read_excel(choice + '/islims_workorders.xlsx')
+de = pd.read_excel(choice + '/islims_workorders_detail.xlsx')
+iv = pd.read_excel(choice + '/islims_inventory.xlsx')
+fc = pd.read_excel(choice + '/islims_failure_codes.xlsx')
 
 #%% Merging and Cleaning Data
 
@@ -73,26 +77,37 @@ iSlims = iSlims[(iSlims['gpsY'] >= -77.15) & (iSlims['gpsY'] <= -76.90)]
 # Cutting out close outliers
 iSlims = iSlims[~((iSlims['gpsX'] >= 38.828) & (iSlims['gpsX'] <= 38.8395) & (iSlims['gpsY'] <= -76.9632) & (iSlims['gpsY'] >= -76.9777))]
 iSlims = iSlims[~((iSlims['gpsX'] >= 38.955) & (iSlims['gpsX'] <= 38.96) & (iSlims['gpsY'] >= -76.98) & (iSlims['gpsY'] <= -76.97))]
-
+iSlims = iSlims.reset_index()
+del iSlims['index']
 
 #%% To Excel
 
-iSlims.to_excel('C:/Users/Sade/Documents/GitHub/lights-and-crime/Lights and Crime Garrett/Data/iSlims_final.xlsx')
+iSlims.to_excel(choice + '/iSlims_final.xlsx')
 
 #%% EDA
 
 # Summary Statistics and histogram on completion days
 iSlims[['daysToComplete', 'daysLate']].describe()
 # on average it takes 2 days to complete a task and the completion tasks are rarely late (excluding completion tasks beyond 14 days).
+plt.figure(1)
 plt.hist(iSlims['daysToComplete'], bins = 23)
 # Something to note: this data closely resembels a Poisson distribution for count data.  Could do a GLM to predict what contributes to repair time.
 # Also Interesting jump at 14ish days and predictible drop after 5ish days.
 
 # Scatter of GPS coordinates
+plt.figure(2)
 plt.scatter(iSlims['gpsX'], iSlims['gpsY'])
 # No obvious problem areas
 # Could also filter by Completion time and Late time, no obvious problem areas there either
 
-#%% Play
+#%% Merged Ready and Standardized iSlims Data
 
+#Standardized iSlims
+SDiSlims = iSlims[['woID', 'entereddate_x', 'resolveddatetime', 'gpsX', 'gpsY']]
+SDiSlims.columns = ['WoID', 'WoEntered', 'WoCompleted', 'gpsX', 'gpsY']
+
+#%%
+SDiSlims.to_excel(choice + '/SDiSlims_final.xlsx')
+
+#%% Play
 
