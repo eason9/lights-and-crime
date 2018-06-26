@@ -10,6 +10,8 @@ Created on Fri Jun 22 10:53:03 2018
 # Packages
 import pandas as pd
 import matplotlib.pyplot as plt
+from collections import Counter
+import datetime as dt
 
 #%% Data
 Windows = 'C:/Users/Sade/Documents/GitHub/lights-and-crime/Lights and Crime Garrett/Data'
@@ -80,6 +82,9 @@ iSlims = iSlims[~((iSlims['gpsX'] >= 38.955) & (iSlims['gpsX'] <= 38.96) & (iSli
 iSlims = iSlims.reset_index()
 del iSlims['index']
 
+# For some reason the coordinate system is backwards
+iSlims[['gpsX', 'gpsY']] = iSlims[['gpsY', 'gpsX']]
+
 #%% To Excel
 
 iSlims.to_excel(choice + '/iSlims_final.xlsx')
@@ -106,8 +111,110 @@ plt.scatter(iSlims['gpsX'], iSlims['gpsY'])
 SDiSlims = iSlims[['woID', 'entereddate_x', 'resolveddatetime', 'gpsX', 'gpsY']]
 SDiSlims.columns = ['WoID', 'WoEntered', 'WoCompleted', 'gpsX', 'gpsY']
 
-#%%
+#%% To Excel
+
 SDiSlims.to_excel(choice + '/SDiSlims_final.xlsx')
 
+#%% Merging iSlims and Citywork
+
+CW = pd.read_excel(choice + '/city_works_merger_data.xlsx')
+CW = CW[(CW['gpsY'] >= 38.7)]
+plt.scatter(CW['gpsX'], CW['gpsY'])
+
+
+Lights = pd.concat([SDiSlims, CW], ignore_index = True)
+
+#%% To Excel
+
+Lights.to_excel(choice + '/Lights.xlsx')
+
+#%% Crimes and EDA
+
+CR = pd.read_excel(choice + '/crimes.xlsx')
+CR[['gpsX', 'gpsY']] = CR[['X', 'Y']]
+CR = CR.drop(['X', 'Y'], axis = 1)
+
+# Relative category numbers
+CR[['SHIFT', 'METHOD', 'OFFENSE']].describe()
+for i in ['SHIFT', 'METHOD', 'OFFENSE']:
+    print(i + ':',Counter(CR[i]))
+# Midnight offenses have least number of occurances.
+
+plt.figure(3)
+plt.scatter(CR[CR['OFFENSE'] == 'BURGLARY']['gpsX'], CR[CR['OFFENSE'] == 'BURGLARY']['gpsY'])
+
 #%% Play
+
+'''
+decimal_range = list(range(3,9))
+
+merge = pd.DataFrame()
+
+for i in decimal_range:
+    CR[['gridX', 'gridY']] = CR[['gpsX', 'gpsY']].round(i)
+    Lights[['gridX', 'gridY']] = Lights[['gpsX', 'gpsY']].round(i)
+    merge = merge.append( CR.merge(Lights, on=['gridX','gridY'], how='inner'), )
+
+merge = pd.DataFrame()
+CR[['gridX', 'gridY']] = CR[['gpsX', 'gpsY']].round(4)
+Lights[['gridX', 'gridY']] = Lights[['gpsX', 'gpsY']].round(4)
+merge = merge.append( CR.merge(Lights, on=['gridX','gridY'], how=''), )
+merge = merge.dropna(subset = ['CCN'])
+
+plt.scatter(merge['gridX'], merge['gridY'])
+'''
+
+######################
+
+merge = pd.DataFrame()
+roundd = 4
+
+CR['new_col'] = list(zip(CR.gpsX.round(roundd), CR.gpsY.round(roundd)))
+Lights['new_col'] = list(zip(Lights.gpsX.round(roundd), Lights.gpsY.round(roundd)))
+merge = merge.append( CR.merge(Lights, on=['new_col'], how='inner'), )
+
+merge['REPORT_DAT'] = [dt.datetime.strptime(date, '%Y-%m-%dT%H:%M:%S.%fZ') for date in merge['REPORT_DAT']]
+merge['Tdelta'] = [0]*len(merge)
+merge['night'] = [0]*len(merge)
+merge = merge.dropna(subset = ['WoCompleted'])
+merge = merge[merge['SHIFT'] != 'DAY']
+merge = merge.reset_index()
+
+for t in range(len(merge)):
+    if merge.loc[t, 'REPORT_DAT'].hour > 18 or merge.loc[t, 'REPORT_DAT'].hour < 8:
+        merge.loc[t, 'night'] = 1
+        
+merge = merge[merge['night'] == 1]
+merge = merge.reset_index()
+
+for i in range(len(merge)):
+    try:
+        if (merge.loc[i, 'WoCompleted'] - merge.loc[i, 'REPORT_DAT']).days <= 10 and (merge.loc[i, 'WoCompleted'] - merge.loc[i, 'REPORT_DAT']).days > 0:
+            merge.loc[i, 'Tdelta'] = 1
+    except:
+        merge.loc[i, 'WoCompleted'] = dt.datetime.strptime(merge.loc[i, 'WoCompleted'], '%Y-%m-%dT%H:%M:%S.%fZ') #some values coded incorrectly
+        if (merge.loc[i, 'WoCompleted'] - merge.loc[i, 'REPORT_DAT']).days <= 10 and (merge.loc[i, 'WoCompleted'] - merge.loc[i, 'REPORT_DAT']).days > 0:
+            merge.loc[i, 'Tdelta'] = 1
+
+sum(merge['Tdelta'])
+sum(merge['Tdelta'])/len(merge)
+len(merge)/len(Lights)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
