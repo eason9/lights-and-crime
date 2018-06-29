@@ -37,14 +37,26 @@ gLights = GeoDataFrame(Lights, geometry=geometry)
 geometry = [Point(xy) for xy in zip(NCR['gpsX'], NCR['gpsY'])]
 gNCR = GeoDataFrame(NCR, geometry=geometry)
 
-BUFFER = 65 #half a city block
+BUFFER = .00125 # Approximately half a city block in Maryland coordinates
 
 gLights_Buff = gLights.assign(geometry = lambda x: x.geometry.buffer(BUFFER)) 
 # Overwrites geometry variable with a buffer centered at the point of interest. A.k.a. applies the function geometry(x) to gNCR.
 
 Matched_Lights = gpd.sjoin(gLights_Buff, gNCR, 'left')
 
-Matched_Lights.to_excel(choice + '/NCR.xlsx')
+Matched_Lights.to_excel(choice + '/Matched_Lights.xlsx')
 
-#%% Play
+#%% Plotting circles
 
+x = []
+y = []
+for i in range(len(gLights_Buff['geometry'])):
+    xc, yc = glights_Buff.loc[i, 'geometry'].exterior.coords.xy
+    x.append(xc)
+    y.append(yc)
+
+plt.figure(1)
+plt.scatter(x, y)
+
+plt.figure(2)
+plt.scatter(Lights['gpsX'], Lights['gpsY'])
