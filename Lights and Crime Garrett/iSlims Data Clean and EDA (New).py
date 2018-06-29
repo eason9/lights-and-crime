@@ -138,10 +138,20 @@ CR = CR.drop(['X', 'Y'], axis = 1)
 CR[['SHIFT', 'METHOD', 'OFFENSE']].describe()
 for i in ['SHIFT', 'METHOD', 'OFFENSE']:
     print(i + ':',Counter(CR[i]))
+    
+CR['REPORT_DAT'] = [dt.datetime.strptime(date, '%Y-%m-%dT%H:%M:%S.%fZ') for date in CR['REPORT_DAT']]
+
+NCR = CR[(CR.REPORT_DAT.dt.hour <= 6) | (CR['REPORT_DAT'].dt.hour > 18)]
+
 # Midnight offenses have least number of occurances.
 
 plt.figure(3)
 plt.scatter(CR[CR['OFFENSE'] == 'BURGLARY']['gpsX'], CR[CR['OFFENSE'] == 'BURGLARY']['gpsY'])
+
+#%% To Excel
+
+NCR.to_excel(choice + '/NCR.xlsx')
+
 
 #%% Play
 
