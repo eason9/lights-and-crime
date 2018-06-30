@@ -11,7 +11,6 @@ Created on Thu Jun 28 17:55:50 2018
 # %matplotlib inline #used for notebook grpahs
 
 from __future__ import (absolute_import, division, print_function)
-import matplotlib.pyplot as plt
 from shapely.geometry import Point
 import pandas as pd
 import geopandas as gpd
@@ -33,8 +32,8 @@ gLights = gLights.drop_duplicates(subset = ['WoID'])
 geometry = [Point(xy) for xy in zip(NCR['gpsX'], NCR['gpsY'])]
 gNCR = GeoDataFrame(NCR, geometry=geometry)
 
-BUFFER = .000625 #4th a city block
-#BUFFER = .00125 #4th a city block
+BUFFER = .000625 # 1/4th of a city block in radius.
+#BUFFER = .00125 # 1/2 of a city block in radius.
 
 gLights_Buff = gLights.assign(geometry = lambda x: x.geometry.buffer(BUFFER)) 
 # Overwrites geometry variable with a buffer centered at the point of interest. A.k.a. applies the function geometry(x) to gNCR and saves it as geometry.
@@ -68,7 +67,3 @@ Matched_Lights1 = Matched_Lights[Matched_Lights['Tdelta'] == 1].drop_duplicates(
 
 Matched_Lights0.to_excel(choice + '/geoLights0.xlsx')
 Matched_Lights1.to_excel(choice + '/geolights1.xlsx')
-
-#%% Play
-
-#and (Matched_Lights.loc[i, 'WoCompleted'] - Matched_Lights.loc[i, 'REPORT_DAT']).days > 0
