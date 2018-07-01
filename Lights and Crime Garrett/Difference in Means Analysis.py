@@ -15,7 +15,7 @@ import numpy as np
 Windows = 'C:/Users/Sade/Documents/GitHub/lights-and-crime/Lights and Crime Garrett/Data'
 Linux = '/home/sade/Desktop/Git Cloned Repos/lights-and-crime/Lights and Crime Garrett/Data'
 
-choice = Windows
+choice = Linux
 
 # Setting up geo joined data 
 # geoLights0 is a df of light outages and crimes that did not happen in a 10 day window
@@ -57,6 +57,10 @@ L_full = L_full.drop(['WoEntered_y', 'WoCompleted_y', 'gpsX_left', 'gpsY_left'],
 L_full = L_full.rename(columns={'gpsX':'gpsX_CR', 'gpsY':'gpsY_CR', 'WoEntered_x':'WoEntered', 'WoCompleted_x':'WoCompleted', 'gpsX_right':'gpsX', 'gpsY_right':'gpsY', 'Tdelta':'Lightout&CR' })
 L_full['Lightout&CR'][np.isnan] = 0
 
+#%% To excel
+
+L_yesCR_dup_only.to_excel(choice + '/Rampage.xlsx')
+L_full.to_excel(choice + '/Final_Lights.xlsx')
 
 #%% Difference in Means Analysis
 
@@ -78,7 +82,7 @@ sum(L_full['CR_After_Fix'])
 # Estimates are based on 10 "days out".
 # Unconditional difference in means: E[u]-E[t]
 meandif = sum(L_full['CR_Before_Fix'])/len(L_full) - sum(L_full['CR_After_Fix'])/len(L_full)
-# Difference in Probability: approximately 0.17%
+# Difference in Probability: approximately 0.17 percentage points
 
 # For a Binary Random Variable:
 # Var(x) = E[x^2] - E[x]^2
@@ -95,7 +99,7 @@ t = meandif/Sdif # t is approximately 3.44
 
 # Conditional difference in means: E[u\'Lightout&CR' = 1] - E[t\'Lightout&CR' = 1]
 meandif = sum(L_full['CR_Before_Fix'])/sum(L_full['Lightout&CR']) - sum(L_full['CR_After_Fix'])/sum(L_full['Lightout&CR'])
-# Difference in Probability: approximately 3.5%
+# Difference in Probability: approximately 3.5 percentage points
 
 VarB = sum(L_full['CR_Before_Fix'])/sum(L_full['Lightout&CR'])*(1 - sum(L_full['CR_Before_Fix'])/sum(L_full['Lightout&CR']))
 VarA = sum(L_full['CR_After_Fix'])/sum(L_full['Lightout&CR'])*(1 - sum(L_full['CR_After_Fix'])/sum(L_full['Lightout&CR']))
