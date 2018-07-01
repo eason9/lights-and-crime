@@ -96,13 +96,13 @@ iSlims[['daysToComplete', 'daysLate']].describe()
 # on average it takes 2 days to complete a task and the completion tasks are rarely late (excluding completion tasks beyond 14 days).
 plt.figure(1)
 plt.hist(iSlims['daysToComplete'], bins = 23)
-# Something to note: this data closely resembels a Poisson distribution for count data.  Could do a GLM to predict what contributes to repair time.
+# Something to note: A Poisson distribution for count data.  Could do a GLM to predict what contributes to repair time.
 # Also Interesting jump at 14ish days and predictible drop after 5ish days.
 
 # Scatter of GPS coordinates
 plt.figure(2)
 plt.scatter(iSlims['gpsX'], iSlims['gpsY'])
-# No obvious problem areas
+# No obvious problem areas jump out.
 # Could also filter by Completion time and Late time, no obvious problem areas there either
 
 #%% Merged Ready and Standardized iSlims Data
@@ -142,9 +142,11 @@ for i in ['SHIFT', 'METHOD', 'OFFENSE']:
 CR['REPORT_DAT'] = [dt.datetime.strptime(date, '%Y-%m-%dT%H:%M:%S.%fZ') for date in CR['REPORT_DAT']]
 
 NCR = CR[(CR.REPORT_DAT.dt.hour <= 6) | (CR['REPORT_DAT'].dt.hour > 18)]
+# Night crimes
 
 # Midnight offenses have least number of occurances.
 
+# Looked at offenses by type
 plt.figure(3)
 plt.scatter(CR[CR['OFFENSE'] == 'BURGLARY']['gpsX'], CR[CR['OFFENSE'] == 'BURGLARY']['gpsY'])
 
@@ -172,7 +174,7 @@ merge = merge.append( CR.merge(Lights, on=['gridX','gridY'], how=''), )
 merge = merge.dropna(subset = ['CCN'])
 
 plt.scatter(merge['gridX'], merge['gridY'])
-'''
+
 
 ######################
 
@@ -210,7 +212,7 @@ sum(merge['Tdelta'])
 sum(merge['Tdelta'])/len(merge)
 len(merge)/len(Lights)
 
-
+'''
 
 
 
