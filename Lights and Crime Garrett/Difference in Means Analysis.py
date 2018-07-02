@@ -15,7 +15,7 @@ import numpy as np
 Windows = 'C:/Users/Sade/Documents/GitHub/lights-and-crime/Lights and Crime Garrett/Data'
 Linux = '/home/sade/Desktop/Git Cloned Repos/lights-and-crime/Lights and Crime Garrett/Data'
 
-choice = Linux
+choice = Windows
 
 # Setting up geo joined data 
 # geoLights0 is a df of light outages and crimes that did not happen in a 10 day window
@@ -139,6 +139,23 @@ plt.figure(1)
 plt.scatter(L_full['gpsX_CR'], L_full['gpsY_CR'])
 plt.scatter(L_yesCR_dup_only['gpsX_left'], L_yesCR_dup_only['gpsY_left'])
 
+plt.figure(2)
+mask1 = (L_full['gpsX_CR'] >= -77.070) & (L_full['gpsX_CR'] <= -77.054) & (L_full['gpsY_CR'] >= 38.898) & (L_full['gpsY_CR'] <= 38.914)
+mask2 = (L_yesCR_dup_only['gpsX_left'] >= -77.070) & (L_yesCR_dup_only['gpsX_left'] <= -77.054) & (L_yesCR_dup_only['gpsY_left'] >= 38.898) & (L_yesCR_dup_only['gpsY_left'] <= 38.914)
+
+plt.scatter(L_full[mask1].gpsX_CR, L_full[mask1].gpsY_CR)
+plt.scatter(L_yesCR_dup_only[mask2].gpsX_left, L_yesCR_dup_only[mask2].gpsY_left)
+
+plt.figure(3)
+mask1 = (L_full['gpsX_CR'] >= -77.046) & (L_full['gpsX_CR'] <= -77.015) & (L_full['gpsY_CR'] >= 38.88) & (L_full['gpsY_CR'] <= 38.94)
+mask2 = (L_yesCR_dup_only['gpsX_left'] >= -77.046) & (L_yesCR_dup_only['gpsX_left'] <= -77.015) & (L_yesCR_dup_only['gpsY_left'] >= 38.88) & (L_yesCR_dup_only['gpsY_left'] <= 38.94)
+
+plt.scatter(L_full[mask1].gpsX_CR, L_full[mask1].gpsY_CR)
+plt.scatter(L_yesCR_dup_only[mask2].gpsX_left, L_yesCR_dup_only[mask2].gpsY_left)
+
+plt.figure(4)
+plt.scatter(L_full['gpsX_CR'], L_full['gpsY_CR'])
+plt.scatter(L_yesCR_dup_only['gpsX_left'], L_yesCR_dup_only['gpsY_left'])
 
 #%% Play
 
