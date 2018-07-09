@@ -13,12 +13,18 @@ iSlims getting back inventoryID
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
+from __future__ import (absolute_import, division, print_function)
+from shapely.geometry import Point
+import geopandas as gpd
+from geopandas import GeoDataFrame
+import datetime as dt
+
 
 #%% Choice
-Windows = 'C:/Users/Sade/Documents/GitHub/lights-and-crime/Lights and Crime Garrett/Data'
+Windows = 'C:/Users/paperspace/Documents/GitHub/lights-and-crime/Lights and Crime Garrett/Data'
 Linux = '/home/sade/Desktop/Git Cloned Repos/lights-and-crime/Lights and Crime Garrett/Data'
 
-choice = Linux
+choice = Windows
 
 #%% Dats set prepping
 isf = pd.read_excel(choice + '/Lights.xlsx')
