@@ -15,7 +15,7 @@ import numpy as np
 Windows = 'C:/Users/Sade/Documents/GitHub/lights-and-crime/Lights and Crime Garrett/Data'
 Linux = '/home/sade/Desktop/Git Cloned Repos/lights-and-crime/Lights and Crime Garrett/Data'
 
-choice = Windows
+choice = Linux
 
 # Setting up geo joined data 
 # geoLights0 is a df of light outages and crimes that did not happen in a 10 day window
@@ -98,7 +98,7 @@ t = meandif/Sdif # t is approximately 3.44
 # Given the magnitude of our esitmate, it is likely that light outages do not effect crime.
 
 # Conditional difference in means: E[u\'Lightout&CR' = 1] - E[t\'Lightout&CR' = 1]
-meandif = sum(L_full['CR_Before_Fix'])/sum(L_full['Lightout&CR']) - sum(L_full['CR_After_Fix'])/sum(L_full['Lightout&CR'])
+meandif = sum(L_full['CR_Before_Fix'])/sum(L_full['Lightout&CR'] ==1) - sum(L_full['CR_After_Fix'])/sum(L_full['Lightout&CR'])
 # Difference in Probability: approximately 3.5 percentage points
 
 VarB = sum(L_full['CR_Before_Fix'])/sum(L_full['Lightout&CR'])*(1 - sum(L_full['CR_Before_Fix'])/sum(L_full['Lightout&CR']))
@@ -174,3 +174,101 @@ plt.scatter(x, y)
 plt.figure(2)
 plt.scatter(Lights['gpsX'], Lights['gpsY'])
 '''
+
+#%% Kill Street
+
+L_yesCR_dup = L_yesCR_dup.drop(['level_0'], 1)
+ks = pd.concat([L_noCR, L_yesCR_dup]) # With overlap
+ks = ks.reset_index()
+ks = ks.drop(['index'], 1)
+
+
+L_yesCR_dup_only[mask2].columns
+L_yesCR_dup_only[mask2]['OFFENSE'].value_counts()
+L_yesCR_dup_only[mask2]['METHOD'].value_counts()
+L_yesCR_dup_only[mask2]['SHIFT'].value_counts()
+
+mask1 = (ks['gpsX_right'] >= -77.071) & (ks['gpsX_right'] <= -77.057) & (ks['gpsY_right'] >= 38.902) & (ks['gpsY_right'] <= 38.908)
+
+
+ks['CR_Before_Fix'] = 0
+for i in ks[ks['Tdelta'] == 1].index:
+    if (ks.loc[i, 'WoCompleted'] - ks.loc[i, 'REPORT_DAT']).days >= 0 and (ks.loc[i, 'WoCompleted'] - ks.loc[i, 'REPORT_DAT']).days <= 10:
+        ks.loc[i, 'CR_Before_Fix'] = 1
+ks['CR_After_Fix'] = 0
+for i in ks[ks['Tdelta'] == 1].index:
+    if (ks.loc[i, 'WoCompleted'] - ks.loc[i, 'REPORT_DAT']).days < 0 and (ks.loc[i, 'WoCompleted'] - ks.loc[i, 'REPORT_DAT']).days >= -10:
+        ks.loc[i, 'CR_After_Fix'] = 1
+
+meandif = sum(ks[mask1]['CR_Before_Fix'])/len(ks[mask1]) - sum(ks[mask1]['CR_After_Fix'])/len(ks[mask1])
+meandif
+#1.1%
+
+VarB = sum(ks[mask1]['CR_Before_Fix'])/len(ks[mask1])*(1 - sum(ks[mask1]['CR_Before_Fix'])/len(ks[mask1]))
+VarA = sum(ks[mask1]['CR_After_Fix'])/len(ks[mask1])*(1 - sum(ks[mask1]['CR_After_Fix'])/len(ks[mask1]))
+Sdif = np.sqrt((VarB/len(ks[mask1]))+(VarA/len(ks[mask1])))
+t = meandif/Sdif
+t # not significant
+
+
+meandif = sum(ks[mask1]['CR_Before_Fix'])/sum(ks[mask1]['Tdelta']) - sum(ks[mask1]['CR_After_Fix'])/sum(ks[mask1]['Tdelta'])
+meandif
+#6.5%
+
+plt.scatter(ks[mask1]['gpsX_right'], ks[mask1]['gpsY_right'])
+
+test = ks[mask1]
+
+
+
+# density plots
+
+L_yesCR_dup
+
+import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy.stats import kde
+SL = pd.read_csv('/home/sade/Desktop/Street_Lights.csv')
+NCR = pd.read_excel(choice + '/NCR.xlsx')
+NCR['OFFENSE'].value_counts()
+NCR2 = NCR[NCR['OFFENSE'] == 'THEFT/OTHER']
+# Evaluate a gaussian kde on a regular grid of nbins x nbins over data extents
+nbins=500
+k = kde.gaussian_kde([SL.X,SL.Y])
+xi, yi = np.mgrid[SL['X'].min():SL['X'].max():nbins*1j, SL['Y'].min():SL['Y'].max():nbins*1j]
+zi = k(np.vstack([xi.flatten(), yi.flatten()]))
+ 
+# Make the plot
+plt.figure(1)
+plt.pcolormesh(xi, yi, zi.reshape(xi.shape))
+plt.scatter(NCR2['gpsX'], NCR2['gpsY'], s=0.3, c='red')
+plt.show()
+ 
+# Change color palette
+plt.pcolormesh(xi, yi, zi.reshape(xi.shape), cmap=plt.cm.Greens_r)
+plt.show()
+
+plt.pcolormesh(xi, yi, zi.reshape(xi.shape), cmap=plt.cm.Greens_r)
+plt.colorbar()
+plt.show()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
