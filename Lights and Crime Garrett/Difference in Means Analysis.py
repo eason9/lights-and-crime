@@ -98,7 +98,7 @@ t = meandif/Sdif # t is approximately 3.44
 # Given the magnitude of our esitmate, it is likely that light outages do not effect crime.
 
 # Conditional difference in means: E[u\'Lightout&CR' = 1] - E[t\'Lightout&CR' = 1]
-meandif = sum(L_full['CR_Before_Fix'])/sum(L_full['Lightout&CR'] ==1) - sum(L_full['CR_After_Fix'])/sum(L_full['Lightout&CR'])
+meandif = sum(L_full['CR_Before_Fix'])/sum(L_full['Lightout&CR']) - sum(L_full['CR_After_Fix'])/sum(L_full['Lightout&CR'])
 # Difference in Probability: approximately 3.5 percentage points
 
 VarB = sum(L_full['CR_Before_Fix'])/sum(L_full['Lightout&CR'])*(1 - sum(L_full['CR_Before_Fix'])/sum(L_full['Lightout&CR']))

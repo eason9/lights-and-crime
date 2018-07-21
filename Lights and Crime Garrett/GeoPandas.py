@@ -18,7 +18,7 @@ from geopandas import GeoDataFrame
 import datetime as dt
 
 #%% Data
-Windows = 'C:/Users/paperspace/Desktop'
+Windows = 'C:/Users/Sade/Documents/GitHub/lights-and-crime/Lights and Crime Garrett/Data'
 Linux = '/home/sade/Desktop/Git Cloned Repos/lights-and-crime/Lights and Crime Garrett/Data'
 
 choice = Windows
