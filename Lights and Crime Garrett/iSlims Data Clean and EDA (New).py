@@ -17,7 +17,7 @@ import datetime as dt
 Windows = 'C:/Users/Sade/Documents/GitHub/lights-and-crime/Lights and Crime Garrett/Data'
 Linux = '/home/sade/Desktop/Git Cloned Repos/lights-and-crime/Lights and Crime Garrett/Data'
 
-choice = Linux
+choice = Windows
 
 wo = pd.read_excel(choice + '/islims_workorders.xlsx')
 de = pd.read_excel(choice + '/islims_workorders_detail.xlsx')
@@ -152,7 +152,7 @@ plt.scatter(CR[CR['OFFENSE'] == 'BURGLARY']['gpsX'], CR[CR['OFFENSE'] == 'BURGLA
 
 #%% To Excel
 
-NCR.to_excel(choice + '/NCR.xlsx')
+NCR.to_excel(choice + '/NCRold.xlsx')
 
 
 #%% Play

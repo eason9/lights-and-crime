@@ -36,10 +36,10 @@ for i in ['SHIFT', 'METHOD', 'OFFENSE']:
     
 CR['REPORT_DAT'] = [dt.datetime.strptime(date, '%Y-%m-%dT%H:%M:%S.%fZ') for date in CR['REPORT_DAT']]
 
-# Shortest day/night times in DC (removing all possible twilight times for a certain comparison, e.g. look at https://www.timeanddate.com/sun/usa/washington-dc)
+# Shortest day/night times in DC, e.g. look at https://www.timeanddate.com/sun/usa/washington-dc.
 
-#night and day crimes
-NCR = CR[(CR.REPORT_DAT.dt.hour <= 4) | (CR['REPORT_DAT'].dt.hour > 22)]
+# Night and day crimes split by Nautical(night) and Civil(day) twilight .
+NCR = CR[(CR.REPORT_DAT.dt.hour <= 5) | (CR['REPORT_DAT'].dt.hour > 21)]
 DCR = CR[(CR.REPORT_DAT.dt.hour <= 17) & (CR['REPORT_DAT'].dt.hour > 7)]
 
 # Night crimes over day crimes
@@ -81,6 +81,7 @@ gLights_Buff = gLights.assign(geometry = lambda x: x.geometry.buffer(BUFFER))
 
 Matched_NLights = gpd.sjoin(gLights_Buff, gNCR, 'left')
 Matched_DLights = gpd.sjoin(gLights_Buff, gDCR, 'left')
+
 # Left geojoin by buffer
 
 #%% Filtering (Note: this takes up the most cpu time/ skip if you already have the data)
@@ -142,6 +143,9 @@ Matched_DLights_F = pd.concat([Matched_DLights0, Matched_DLights1])
 
 #Matched_NLights_F.to_excel(choice + '/Matched_NLights_F.xlsx')
 #Matched_DLights_F.to_excel(choice + '/Matched_DLights_F.xlsx')
+Matched_Lights0.to_excel(choice + '/geoNLights0.xlsx')
+Matched_Lights1.to_excel(choice + '/geoNlights1.xlsx')
+
 
 #%% Merging with unmatched lights
 
